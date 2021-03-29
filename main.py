@@ -1,45 +1,42 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-import cv2
-from skimage.io import imread_collection
-import SimpleITK as sitk
 import os
-import skimage.io as io
-import nibabel as nib
-import os
-import numpy as np
-import nibabel as nib
-import imageio
-import matplotlib
-from PIL import Image
-from nibabel.viewers import OrthoSlicer3D
-
-
-path = 'C:/Users/musta/.spyder-py3/bitirme/DataSet_Train/HGG/brats_2013_pat0001_1/VSD.Brain.XX.O.MR_T2.54515.mha' 
-outpath  = 'C:/Users/musta/.spyder-py3/bitirme/DataSet_Train/HGG/brats_2013_pat0001_1/asd.nii'
-
-img = io.imread(path,plugin='simpleitk')
-io.imsave(outpath, img,plugin='simpleitk')
-
-def read_niifile(niifilepath): #read niifile file
-    img = nib.load(niifilepath) #download niifile file (actually extract the file)
-    img_fdata = img.get_fdata() #Get niifile data
-    return img_fdata
+import numpy
+import SimpleITK
+import matplotlib.pyplot as plt
+import numpy
+import SimpleITK
+import matplotlib.pyplot as plt
  
-def save_fig(niifilepath,savepath): #Save as picture
-    fdata = read_niifile(niifilepath) #Call the above function to get data
-    (x,y,z) = fdata.shape #Get data shape information: (length, width, dimension-number of slices, fourth dimension)
-    for k in range(z):
-        silce = fdata[:,:,k] #Three positions represent three slices with different angles
-    imageio.imwrite(os.path.join(savepath,'{}.png'.format(k)),silce)
-                                                                                 #Save the slice information as png format
+def sitk_show(img, title=None, margin=0.0, dpi=40):
+    nda = SimpleITK.GetArrayFromImage(img)
+    # spacing = img.GetSpacing()
+    figsize = (1 + margin) * nda.shape[0] / dpi, (1 + margin) * nda.shape[1] / dpi
+    # extent = (0, nda.shape[1]*spacing[1], nda.shape[0]*spacing[0], 0)
+    extent = (0, nda.shape[1], nda.shape[0], 0)
+    fig = plt.figure(figsize=figsize, dpi=dpi)
+    ax = fig.add_axes([margin, margin, 1 - 2 * margin, 1 - 2 * margin])
  
-if __name__=='__main__':
-    niifilepath='C:/Users/musta/.spyder-py3/bitirme/DataSet_Train/HGG/brats_2013_pat0001_1/asd.nii'
-    savepath='C:/Users/musta/.spyder-py3/bitirme/DataSet_Train/HGG/brats_2013_pat0001_1/AD'
-    if not os.path.exists(savepath):
-        os.makedirs(savepath)
-    save_fig(niifilepath,savepath)
+    plt.set_cmap("gray")
+    ax.imshow(nda, extent=extent, interpolation=None)
+ 
+    if title:
+        plt.title(title)
+ 
+    plt.show()
+ 
+# Paths to the .mhd files
+filenameT1 = "C:/Users/musta/.spyder-py3/bitirme/DataSet_Train/HGG/brats_2013_pat0001_1/VSD.Brain.XX.O.MR_T1.54513.mha"
+filenameT2 = "C:/Users/musta/.spyder-py3/bitirme/DataSet_Train/HGG/brats_2013_pat0001_1/VSD.Brain.XX.O.MR_T2.54515.mha"
+
+# Slice index to visualize with 'sitk_show'
+idxSlice = 1
+ 
+# int label to assign to the segmented gray matter
+labelGrayMatter = 1
+ 
+imgT1Original = SimpleITK.ReadImage(filenameT1)
+imgT2Original = SimpleITK.ReadImage(filenameT2)
+ 
+while idxSlice < 154:
+    idxSlice = idxSlice + 1
+    sitk_show(SimpleITK.Tile(imgT1Original[:, :, idxSlice],
+                         imgT2Original[:, :, idxSlice]))
