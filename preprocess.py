@@ -1,51 +1,34 @@
-import tensorflow as tf
-from tensorflow.keras.models import Model
-import numpy as np
 import glob
-import random as r
+import numpy as np
+from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 import skimage.io as io
-import matplotlib.pyplot as plt
-from tensorflow.keras.layers import Dense, Dropout, Activation, Flatten
-from tensorflow.keras.layers import concatenate, Conv2D, MaxPooling2D, Conv2DTranspose
-from tensorflow.keras.layers import Input, UpSampling2D,BatchNormalization
-from tensorflow.keras.callbacks import ModelCheckpoint
-from tensorflow.keras.optimizers import Adam
-from tensorflow.keras.preprocessing.image import ImageDataGenerator
-from tensorflow.keras import backend as K
-from keras.models import load_model
+import skimage.transform as trans
+import SimpleITK as sitk
 
 
-img_size = 120
 
-def train_array(path,end,label=False, resize=(155,img_size,img_size)): #flair,t2 için
-    files = glob.glob(path+end,recursive=True)
-    img_liste = []
-    r.seed(9)
-    r.shuffle(files)
+# mri görüntülerin boyutu
+img_size = 120 
+
+
+# arttırma sayısı
+num_of_aug = 1
+
+#total örneklem
+total_examples = 8000
+
+# eğitim görüntülerine önişleme uygulama
+def data_array(path, end, label=False, resize=(155,img_size,img_size)):
+    files = glob.glob(path + end, recursive=True)
+    imgs = []
+    print('Processing---', end)
+    
     for file in files:
-        img = io.imread(file,plugin='simpleitk')
-        img = (img-img.mean())/ img.std()
-        img.astype('float32')
+        img = io.imread(file, plugin='simpleitk')
+        img = trans.resize(img, resize, mode='constant')
         
-        for slice in range(50,130): #kesit aralığı
-            img_s = img[slice,:,:]
-            img_s = np.expand_dims(img_s,axis=1)
-            img_liste.append(img_s)
-            
-    name = 'x_'+ str(img_size)
-    np.save(name, np.array(img_liste),np.float32)
-    print('Saved', len(files), 'to', name)
-    return np.array(img_liste,np.float32)
-
-def seg_array(path,end,label=True, resize=(155,img_size,img_size)): #seg data için
-    files = glob.glob(path+end,recursive=True)
-    img_liste = []
-    r.seed(9)
-    r.shuffle(files)
-    for file in files:
-        img = io.imread(file,plugin='simpleitk')
-        
-        if label == 1:
+        if label:   # seg görüntüleri
+            if label == 1:
             img[img != 0 ] = 1 # tam tümör
         if label == 2:
             img[img != 1 ] = 0 # nekroz
@@ -56,22 +39,27 @@ def seg_array(path,end,label=True, resize=(155,img_size,img_size)): #seg data i�
             img[img != 4 ] = 0 # genişleyen tümör
             img[img == 4 ] = 1
          
+            img = img.astype('float32')
+            
         else:
-            img = (img-img.mean()) / img.std()      # flair images
+            img = (img-img.mean()) / img.std()      # flair görüntüleri
             
-        
-        for slice in range(50,130): #kesit aralığı
-            img_s = img[slice,:,:]
-            img_s = np.expand_dims(img_s,axis=0)
-            img_liste.append(img_s)
+        for slice in range(50,130):
+            img_t = img[slice,:,:]
+            img_t =img_t.reshape((1,)+img_t.shape)
+            img_t =img_t.reshape((1,)+img_t.shape)
+            img_g = aug(img_t,num_of_aug)       #arttırma işlemi
             
-    name = 'y_'+ str(img_size)
-    np.save(name, np.array(img_liste),np.float32)
+            for n in range(img_g.shape[0]):
+                imgs.append(img_g[n,:,:,:])
+                
+    name = 'y_'+ str(img_size) if label else 'x_'+ str(img_size)    #save array
+    np.save(name, np.array(imgs).astype('float32'))
     print('Saved', len(files), 'to', name)
-    return np.array(img_liste,np.float32)
 
-def aug(scans,n):          
-    datagen = ImageDataGenerator(
+
+def aug(scans,n):          #giriş görüntülerinin boyutu 4 olmalı
+    datagen = ImageDataGenerator(   #arttırma fonksiyonu
         featurewise_center=False,
         samplewise_center=False,
         featurewise_std_normalization=False,
@@ -82,18 +70,15 @@ def aug(scans,n):
         vertical_flip=True,
         zoom_range=False)
     i=0
-    img_liste=scans.copy()
+    img_g=scans.copy()
     for batch in datagen.flow(scans, batch_size=1, seed=1000):
-        img_liste=np.vstack([img_liste,batch])
+        img_g=np.vstack([img_g,batch])
         i += 1
         if i == n:
             break
-    return img_liste
+    return img_g
 
-#verileri okuma
-flair = train_array('D:/Kullanıcılar/.spyder-py3/bitirme/MICCAI_BraTS2020_TrainingData', '**\\*_flair.nii',label=False, resize=(155,img_size,img_size))
-seg = seg_array('D:/Kullanıcılar/.spyder-py3/bitirme/MICCAI_BraTS2020_TrainingData', '**\\*_seg.nii',label=True, resize=(155,img_size,img_size)) #sondaki değer label değeri
-print(flair.shape)
 
-K.set_image_data_format('channels_first') # (240,240,1) => (1,240,240) yani katman sayisi ilk
+flair = data_array('D:\\Dataset\\MICCAI_BraTS2020_TrainingData\\', '**\\*_flair.nii.gz',label=False, resize=(155,img_size,img_size))
+seg = data_array('D:\\Dataset\\MICCAI_BraTS2020_TrainingData\\', '**\\*_seg.nii.gz',label=True, resize=(155,img_size,img_size))
 
