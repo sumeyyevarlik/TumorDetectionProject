@@ -27,8 +27,8 @@ def data_array(path, end, label=False, resize=(155,img_size,img_size)):
         img = io.imread(file, plugin='simpleitk')
         img = trans.resize(img, resize, mode='constant')
         
-        if label:   # seg görüntüleri
-            if label == 1:
+       
+        if label == 1:           # seg görüntüleri
             img[img != 0 ] = 1 # tam tümör
         if label == 2:
             img[img != 1 ] = 0 # nekroz
