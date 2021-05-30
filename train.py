@@ -17,7 +17,7 @@ from keras.optimizers import Adam
 from keras import backend as K
 from keras.utils import plot_model
 
-
+#bu eğitim arttırılmış veri üzerinde gerçekleştirilerek data augmentation işleminin modelin eğitimi üzerindeki etkilerini görmek için yapıldı
 img_size = 120
 
 # öğrenme oranı
