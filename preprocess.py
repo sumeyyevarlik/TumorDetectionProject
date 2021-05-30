@@ -5,7 +5,7 @@ import skimage.io as io
 import skimage.transform as trans
 import SimpleITK as sitk
 
-
+#bu islem veri büyütmenin modelin eğitim snuçlarında karşılaştırma yapmak için yapılmıştır.
 
 # mri görüntülerin boyutu
 img_size = 120 
