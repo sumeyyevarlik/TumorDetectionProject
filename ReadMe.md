@@ -12,7 +12,7 @@ for each patient's image in dataset : T1, T1ce, T2, and FLAIR.
 The properties of each of these sequences are different from each other. Tag information for segmentation is available in the dataset. Label 0 
 segmentation of the radiologist, label 1 full tumor, label 2 necrosis, label 3 non-edema tumor, label 4 enhancing tumor.
 
-   <img src="https://user-images.githubusercontent.com/50299378/120863728-b0ae2800-c593-11eb-826b-cf4faa8cce07.png" width="545" height="155"><br>
+   <img src="https://user-images.githubusercontent.com/50299378/120863728-b0ae2800-c593-11eb-826b-cf4faa8cce07.png" width="560" height="155"><br>
    <sub><b>Figure 1: </b> Different sequences of brain images </sub><br> 
 
 ## Data Preprocess
