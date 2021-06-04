@@ -43,9 +43,9 @@ The model, which can easily detect full tumors, cannot successfully detect enhan
 <img src="https://user-images.githubusercontent.com/50299378/120868741-5b771400-c59d-11eb-9356-f5055e0d1272.png" width="450" height="150"><br>
 <sub><b>Figure 4: </b> Image of flair, t2 and concatenated forms </sub><br>
 
-For this T1C images by giving to the model will be provided a better learning. Training continues by gives all these pictures to the model as a series. For the training of the second and third models, the data prepared by applying cropping on the T1ce images will be used. The data divided into two as enhancing and non-edema according to the label 
+For this T1ce images by giving to the model will be provided a better learning. Training continues by gives all these pictures to the model as a series. For the training of the second and third models, the data prepared by applying cropping on the T1ce images will be used. The data divided into two as enhancing and non-edema according to the label 
 value is thrown into two arrays defined by cropping and applying threshold. A 7-layered U-Net model is applied for each array, and model training is carried out with the necessary parameters. At the end of the training, 2 more models are created, where the model can make predictions for enhancing and non-edema tumor sections. The weight values resulting from the training are saved to be used in the last segmentation process.
-The previously trained model can successfully detect tumors on MR images such as Flair, T2 and generate predictions.  The model, which had difficulties in detecting small tumors in T1C MR images and produced erroneous results, has been able to detect small tumors successfully thanks to cropping processes.
+The previously trained model can successfully detect tumors on MR images such as Flair, T2 and generate predictions.  The model, which had difficulties in detecting small tumors in T1ce MR images and produced erroneous results, has been able to detect small tumors successfully thanks to cropping processes.
 
 <img src="https://user-images.githubusercontent.com/50299378/120868252-4e0d5a00-c59c-11eb-831f-090390a18fb5.png" width="470" height="150"><br>
 <sub><b>Figure 5: </b> Cropped view of the tumor area and the non-edematous area </sub><br>
